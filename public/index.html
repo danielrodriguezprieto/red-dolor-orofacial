@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Red de Profesionales Especialistas en Dolor Orofacial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+:root{--bg:#f4f7f6;--card:#fff;--ink:#16282c;--mute:#5d7074;--line:#d8e2e0;--pri:#1d6b75;--pri-d:#144f57;--tint:#e5f0ef;--r:10px}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.5 Figtree,system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+h1,h2{font-family:Newsreader,Georgia,serif;font-weight:600;margin:0}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+header{padding:14px 20px;background:var(--pri-d);color:#fff}
+header h1{font-size:1.35rem;line-height:1.2}
+header p{margin:2px 0 0;font-size:.9rem;opacity:.85}
+main{display:grid;grid-template-columns:minmax(360px,460px) 1fr;height:calc(100vh - 118px);min-height:520px}
+#side{overflow:auto;padding:16px 16px 8px}
+#map{height:100%;min-height:300px}
+.bar{display:flex;gap:8px;margin-bottom:10px}
+input[type=search]{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);font:inherit}
+.btn{padding:10px 14px;border:1px solid var(--pri);background:#fff;color:var(--pri);border-radius:var(--r);font-weight:500}
+.btn.on,.btn.fill{background:var(--pri);color:#fff}
+details{margin-bottom:12px}
+summary{cursor:pointer;font-weight:600;padding:6px 0}
+.grp{margin:8px 0}
+.grp b{display:block;font-size:.85rem;color:var(--mute);margin-bottom:4px;font-weight:500}
+.chip{margin:0 6px 6px 0;padding:4px 11px;border:1px solid var(--line);background:#fff;border-radius:99px;font-size:.88rem}
+.chip[aria-pressed=true]{background:var(--pri);border-color:var(--pri);color:#fff}
+#count{font-size:.9rem;color:var(--mute);margin:4px 0 10px}
+.card{display:grid;grid-template-columns:56px 1fr;gap:12px;padding:14px;margin-bottom:10px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);cursor:pointer}
+.card:hover,.card.hl{border-color:var(--pri);box-shadow:0 0 0 2px var(--tint)}
+.ph{width:56px;height:56px;border-radius:50%;background:var(--tint);color:var(--pri-d);display:grid;place-items:center;font-weight:600;overflow:hidden}
+.ph img{width:100%;height:100%;object-fit:cover}
+.card h2{font-size:1.1rem}
+.sub{color:var(--mute);font-size:.9rem}
+.tags{margin:6px 0}
+.tag{display:inline-block;margin:0 4px 4px 0;padding:1px 9px;background:var(--tint);border-radius:6px;font-size:.8rem}
+.seal{font-size:.8rem;color:var(--pri-d);font-weight:500}
+.acts{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+.acts a{padding:5px 11px;border:1px solid var(--pri);border-radius:8px;color:var(--pri);text-decoration:none;font-size:.85rem}
+.acts a:hover{background:var(--pri);color:#fff}
+.empty{padding:20px;background:#fff;border:1px dashed var(--line);border-radius:var(--r)}
+footer{padding:10px 16px 20px;font-size:.82rem;color:var(--mute)}
+dialog{width:min(640px,94vw);max-height:88vh;border:0;border-radius:14px;padding:24px;color:var(--ink)}
+dialog::backdrop{background:rgba(10,30,34,.5)}
+dialog h2{font-size:1.5rem}
+dialog h3{font-size:.95rem;margin:16px 0 4px}
+.x{float:right}
+.dot{width:16px;height:16px;border-radius:50%;background:var(--pri);border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45)}
+@media(max-width:800px){main{display:block;height:auto}#map{height:280px}#side{overflow:visible}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Red de Profesionales Especialistas en Dolor Orofacial</h1>
+  <p>Encuentra fisioterapeutas especializados cerca de ti</p>
+</header>
+<main>
+  <section id="side" aria-label="Buscador y resultados">
+    <div class="bar">
+      <input id="q" type="search" placeholder="Ciudad, provincia o código postal" aria-label="Buscar por ciudad, provincia o código postal">
+      <button id="near" class="btn" aria-pressed="false">Cerca de mí</button>
+    </div>
+    <details open><summary>Filtros</summary><div id="filters"></div></details>
+    <div id="count" aria-live="polite"></div>
+    <div id="list"></div>
+    <footer>Directorio de profesionales independientes. La información la facilita cada profesional.</footer>
+  </section>
+  <div id="map" role="region" aria-label="Mapa de profesionales"></div>
+</main>
+<dialog id="dlg"></dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+const SUPABASE_URL = 'https://axsfjjhszjgjzlhesdti.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_7PjIuZRkaf8DTyQbWQ-HYA_ic983WxT';
+const RED = 'Red de Profesionales Especialistas en Dolor Orofacial';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const GROUPS = [
+  {k:'pat', t:'Qué trata', field:'patologias'},
+  {k:'pob', t:'Población', field:'poblaciones', opts:[['adultos','Adultos'],['pediatria','Pediatría'],['geriatria','Geriatría']]},
+  {k:'her', t:'Herramientas', field:'herramientas'},
+  {k:'mod', t:'Modalidad', field:'modalidades', opts:[['presencial','Presencial'],['online','Online'],['domicilio','A domicilio']]},
+  {k:'idi', t:'Idioma', field:'idiomas'}
+];
+const S = {profs:[], cen:{}, f:{pat:new Set(),pob:new Set(),her:new Set(),mod:new Set(),idi:new Set()}, q:'', pos:null, hl:null};
+const labels = {};
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s => String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+const url = u => { if (!u) return ''; u = u.trim(); if (!/^https?:\/\//i.test(u)) u = 'https://' + u; return /^https?:\/\/[^\s"'<>]+$/i.test(u) ? u : ''; };
+const km = (a, b, c, d) => { const r = x => x * Math.PI / 180, h = Math.sin(r(c - a) / 2) ** 2 + Math.cos(r(a)) * Math.cos(r(c)) * Math.sin(r(d - b) / 2) ** 2; return 12742 * Math.asin(Math.sqrt(h)); };
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+const map = L.map('map').setView([40.3, -3.7], 6);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 18, attribution: '&copy; colaboradores de OpenStreetMap'}).addTo(map);
+const layer = L.layerGroup().addTo(map);
+
+async function init() {
+  const [p, c, pa, he] = await Promise.all([
+    db.from('v_profesionales_publico').select('*'),
+    db.from('v_centros_publico').select('*'),
+    db.from('patologias').select('nombre').order('nombre'),
+    db.from('herramientas').select('nombre').order('nombre')
+  ]);
+  if (p.error || c.error) { document.getElementById('list').innerHTML = '<div class="empty">No se ha podido cargar el directorio. Inténtalo de nuevo en unos minutos.</div>'; return; }
+  S.profs = shuffle(p.data);
+  c.data.forEach(x => (S.cen[x.profesional_id] ||= []).push(x));
+  labels.pat = (pa.data || []).map(x => [x.nombre, x.nombre]);
+  labels.her = (he.data || []).map(x => [x.nombre, x.nombre]);
+  labels.idi = [...new Set(S.profs.flatMap(x => x.idiomas || []))].sort().map(x => [x, x]);
+  GROUPS.forEach(g => { if (g.opts) labels[g.k] = g.opts; });
+  buildFilters(); render();
+}
+
+function buildFilters() {
+  document.getElementById('filters').innerHTML = GROUPS.filter(g => labels[g.k].length).map(g =>
+    `<div class="grp"><b>${g.t}</b>${labels[g.k].map(([v, l]) => `<button class="chip" aria-pressed="false" data-k="${g.k}" data-v="${esc(v)}">${esc(l)}</button>`).join('')}</div>`).join('');
+}
+document.getElementById('filters').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  const s = S.f[b.dataset.k], v = b.dataset.v;
+  s.has(v) ? s.delete(v) : s.add(v);
+  b.setAttribute('aria-pressed', s.has(v)); render();
+});
+document.getElementById('q').addEventListener('input', e => { S.q = norm(e.target.value); render(); });
+document.getElementById('near').addEventListener('click', e => {
+  const b = e.currentTarget;
+  if (S.pos) { S.pos = null; b.setAttribute('aria-pressed', 'false'); b.classList.remove('on'); return render(); }
+  navigator.geolocation?.getCurrentPosition(p => { S.pos = [p.coords.latitude, p.coords.longitude]; b.setAttribute('aria-pressed', 'true'); b.classList.add('on'); render(); },
+    () => alert('No hemos podido obtener tu ubicación. Revisa el permiso del navegador o escribe tu ciudad.'));
+});
+
+function matches(p) {
+  for (const g of GROUPS) {
+    const sel = S.f[g.k]; if (!sel.size) continue;
+    const have = p[g.field] || [];
+    if (![...sel].some(v => have.includes(v))) return false;
+  }
+  if (S.q) {
+    const hit = (S.cen[p.id] || []).some(c => [c.ciudad, c.provincia, c.codigo_postal].some(x => norm(x).includes(S.q)));
+    if (!hit) return false;
+  }
+  return true;
+}
+const mainCenter = p => { const c = S.cen[p.id] || []; return c.find(x => x.es_principal) || c[0]; };
+const dist = p => { if (!S.pos) return null; const d = (S.cen[p.id] || []).filter(c => c.latitud != null).map(c => km(S.pos[0], S.pos[1], c.latitud, c.longitud)); return d.length ? Math.min(...d) : null; };
+
+function render() {
+  let res = S.profs.filter(matches);
+  if (S.pos) res = res.map(p => [p, dist(p)]).sort((a, b) => (a[1] ?? 1e9) - (b[1] ?? 1e9)).map(x => x[0]);
+  document.getElementById('count').textContent = res.length === 1 ? '1 profesional' : res.length + ' profesionales';
+  document.getElementById('list').innerHTML = res.length ? res.map(card).join('') :
+    '<div class="empty"><b>No hay profesionales con estos criterios.</b><br>Quita algún filtro o prueba con otra zona.</div>';
+  drawMap(res);
+}
+
+function card(p) {
+  const c = mainCenter(p) || {}, d = dist(p);
+  const img = url(p.foto_url), ini = esc((p.nombre[0] || '') + (p.apellidos[0] || ''));
+  const tel = (c.telefono || '').replace(/[^\d+]/g, ''), web = url(c.web);
+  return `<article class="card" data-id="${p.id}" tabindex="0">
+    <div class="ph">${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : ini}</div>
+    <div><h2>${esc(p.nombre)} ${esc(p.apellidos)}</h2>
+    <div class="sub">${esc([c.nombre, c.ciudad].filter(Boolean).join(' · '))}${d != null ? ` · a ${d < 10 ? d.toFixed(1) : Math.round(d)} km` : ''}</div>
+    <div class="tags">${(p.patologias || []).slice(0, 4).map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
+    <div class="seal">Miembro verificado de la red</div>
+    <div class="acts">${tel ? `<a href="tel:${esc(tel)}">Llamar</a>` : ''}${c.email ? `<a href="mailto:${esc(c.email)}">Email</a>` : ''}${web ? `<a href="${esc(web)}" target="_blank" rel="noopener noreferrer">Web</a>` : ''}</div></div></article>`;
+}
+document.getElementById('list').addEventListener('click', e => { if (e.target.closest('a')) return; const a = e.target.closest('.card'); if (a) openFicha(a.dataset.id); });
+document.getElementById('list').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList.contains('card')) openFicha(e.target.dataset.id); });
+
+function drawMap(res) {
+  layer.clearLayers(); const pts = [];
+  res.forEach(p => (S.cen[p.id] || []).forEach(c => {
+    if (c.latitud == null) return;
+    const ll = [c.latitud, c.longitud]; pts.push(ll);
+    const m = c.visibilidad_direccion === 'zona'
+      ? L.circle(ll, {radius: 1500, color: '#1d6b75', weight: 2, fillOpacity: .15})
+      : L.marker(ll, {icon: L.divIcon({className: '', html: '<div class="dot"></div>', iconSize: [16, 16]}), title: p.nombre + ' ' + p.apellidos});
+    m.on('click', () => openFicha(p.id)).addTo(layer);
+  }));
+  if (pts.length) map.fitBounds(L.latLngBounds(pts).pad(.2), {maxZoom: 13});
+}
+
+function list(t, a) { return a && a.length ? `<h3>${t}</h3><div>${a.map(x => `<span class="tag">${esc(x)}</span>`).join('')}</div>` : ''; }
+function openFicha(id) {
+  const p = S.profs.find(x => x.id === id); if (!p) return;
+  const nice = (a, o) => (a || []).map(v => (o.find(y => y[0] === v) || [0, v])[1]);
+  const cen = (S.cen[id] || []).map(c => {
+    const w = url(c.web), loc = c.visibilidad_direccion === 'exacta' ? [c.direccion, c.codigo_postal, c.ciudad, c.provincia] : c.visibilidad_direccion === 'zona' ? ['Zona de ' + c.ciudad, c.provincia] : [c.ciudad, c.provincia];
+    return `<p><b>${esc(c.nombre || 'Centro')}</b><br>${esc(loc.filter(Boolean).join(', '))}
+      ${c.telefono ? `<br>Tel. <a href="tel:${esc(c.telefono.replace(/[^\d+]/g, ''))}">${esc(c.telefono)}</a>` : ''}
+      ${c.email ? `<br><a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : ''}
+      ${w ? `<br><a href="${esc(w)}" target="_blank" rel="noopener noreferrer">${esc(w)}</a>` : ''}</p>`;
+  }).join('');
+  document.getElementById('dlg').innerHTML = `<button class="btn x" onclick="dlg.close()">Cerrar</button>
+    <h2>${esc(p.nombre)} ${esc(p.apellidos)}</h2><div class="seal">Miembro verificado de la ${RED}</div>
+    ${p.presentacion ? `<p>${esc(p.presentacion)}</p>` : ''}
+    ${list('Qué trata', p.patologias)}${list('Población', nice(p.poblaciones, labels.pob))}${list('Herramientas', p.herramientas)}
+    ${list('Modalidad', nice(p.modalidades, labels.mod))}${list('Idiomas', p.idiomas)}
+    ${p.otras_formaciones ? `<h3>Otras formaciones</h3><p>${esc(p.otras_formaciones)}</p>` : ''}
+    <h3>Dónde atiende</h3>${cen || '<p>Sin centros publicados.</p>'}`;
+  document.getElementById('dlg').showModal();
+}
+const dlg = document.getElementById('dlg');
+dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+init();
+</script>
+</body>
+</html>
