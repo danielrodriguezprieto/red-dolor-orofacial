@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acceso profesionales · Red de Profesionales Especialistas en Dolor Orofacial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f7f6;--ink:#16282c;--mute:#5d7074;--line:#d8e2e0;--pri:#1d6b75;--pri-d:#144f57;--tint:#e5f0ef;--r:10px}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.5 Figtree,system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+h1,h2{font-family:Newsreader,Georgia,serif;font-weight:600;margin:0}
+header{padding:14px 20px;background:var(--pri-d);color:#fff}
+header h1{font-size:1.3rem}header a{color:#fff;font-size:.9rem}
+main{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+section{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:16px}
+h2{font-size:1.2rem;margin-bottom:10px}
+label{display:block;font-size:.9rem;font-weight:500;margin:10px 0 0}
+input:not([type=checkbox]):not([type=radio]),select,textarea{width:100%;padding:9px 11px;margin-top:3px;border:1px solid var(--line);border-radius:8px;font:inherit}
+textarea{min-height:90px}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:0 12px}
+.ck{display:inline-block;margin:6px 14px 0 0;font-weight:400}
+.ck input{margin-right:5px}
+.tool{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}.tool label{margin:0;font-weight:400;min-width:230px}.tool select{width:auto;margin:0}
+.centro{border:1px solid var(--line);border-radius:var(--r);padding:12px;margin-top:12px;background:#fafcfc}
+.btn{padding:10px 18px;border:1px solid var(--pri);background:#fff;color:var(--pri);border-radius:var(--r);font:inherit;font-weight:500;cursor:pointer}
+.btn.fill{background:var(--pri);color:#fff}.link{background:none;border:0;color:var(--pri);text-decoration:underline;cursor:pointer;font:inherit}
+.note{font-size:.85rem;color:var(--mute);margin:4px 0 0}
+.banner{padding:12px 14px;border-radius:var(--r);margin-bottom:16px;background:var(--tint)}
+#msg{position:sticky;bottom:10px;padding:10px 14px;border-radius:var(--r);background:var(--pri-d);color:#fff;display:none}
+#msg.err{background:#8a2b2b}
+#foto{width:84px;height:84px;border-radius:50%;object-fit:cover;background:var(--tint);display:block;margin-bottom:6px}
+:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+.hide{display:none}
+</style>
+</head>
+<body>
+<header><h1>Red de Profesionales Especialistas en Dolor Orofacial</h1><a href="index.html">← Volver al directorio</a> <button id="out" class="link hide" style="color:#fff;float:right">Cerrar sesión</button></header>
+<main>
+<section id="login">
+  <h2>Acceso para profesionales</h2>
+  <p>Escribe el email con el que te invitaron. Te enviaremos un enlace para entrar, sin contraseña.</p>
+  <form id="lf"><label for="em">Email</label><input id="em" type="email" required autocomplete="email">
+  <p><button class="btn fill">Enviarme el enlace</button></p></form>
+  <p id="lm" class="note" aria-live="polite"></p>
+</section>
+
+<form id="app" class="hide">
+  <div id="banner" class="banner"></div>
+  <section><h2>Tus datos</h2>
+    <img id="foto" alt="Tu foto">
+    <label>Foto (opcional)<input id="fotoin" type="file" accept="image/*"></label>
+    <div class="row"><label>Nombre *<input id="nombre" required></label><label>Apellidos *<input id="apellidos" required></label></div>
+    <label>Presentación (máx. 500 caracteres)<textarea id="presentacion" maxlength="500"></textarea></label>
+    <label>Otras formaciones (opcional)<textarea id="otras"></textarea></label>
+    <div class="row"><label>Nº de colegiado * <input id="colegiado" required></label><label>Colegio profesional * <input id="colegio" required></label></div>
+    <p class="note">El nº de colegiado y el colegio son privados: solo los ve la administradora para verificarte.</p>
+  </section>
+  <section><h2>Cómo atiendes</h2>
+    <label>Modalidad</label><div id="mod"></div>
+    <label>Población</label><div id="pob"></div>
+    <label>Idiomas</label><div id="idi"></div>
+    <label>Otros idiomas (separados por comas)<input id="idiotros"></label>
+  </section>
+  <section><h2>Qué tratas</h2><div id="pat"></div></section>
+  <section><h2>Herramientas</h2><p class="note">Marca las que usas e indica si es habitual o la usas poco.</p><div id="her"></div></section>
+  <section><h2>Dónde atiendes</h2>
+    <p class="note">Por defecto solo se muestra ciudad y provincia. Tú decides qué ubicación se publica en cada centro.</p>
+    <div id="centros"></div><p><button type="button" class="btn" id="addc">+ Añadir otro centro</button></p>
+  </section>
+  <section><h2>Zona interna (solo la ven otros miembros)</h2>
+    <label class="ck"><input type="checkbox" id="deriv"> Acepto derivaciones de otros profesionales</label>
+    <label>Acepto derivaciones de</label><div id="dd"></div>
+    <label>Trabajo en equipo con</label><div id="eq"></div>
+    <label>Contacto directo para colegas (móvil o email, opcional)<input id="contacto"></label>
+  </section>
+  <section><h2>Consentimientos</h2>
+    <label class="ck"><input type="checkbox" id="c_pub"> Quiero aparecer en el directorio público.</label><br>
+    <label class="ck"><input type="checkbox" id="c_int"> Quiero participar en la zona interna (ver y ser visto por otros miembros).</label><br>
+    <label class="ck"><input type="checkbox" id="c_pol"> He leído y acepto la <a href="privacidad.html" target="_blank">política de privacidad</a>. *</label>
+    <p class="note">Puedes retirar cualquier consentimiento en cualquier momento desmarcándolo y guardando.</p>
+  </section>
+  <p><button class="btn fill">Guardar cambios</button> <button type="button" class="btn" id="retirar">Retirarme del directorio</button></p>
+  <div id="msg" role="status"></div>
+</form>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script>
+const SUPABASE_URL = 'https://axsfjjhszjgjzlhesdti.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_7PjIuZRkaf8DTyQbWQ-HYA_ic983WxT';
+const VERSION = 'v1-2026-10';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const $ = s => document.querySelector(s);
+const PROV = ['Álava','Albacete','Alicante','Almería','Asturias','Ávila','Badajoz','Baleares','Barcelona','Burgos','Cáceres','Cádiz','Cantabria','Castellón','Ceuta','Ciudad Real','Córdoba','A Coruña','Cuenca','Girona','Granada','Guadalajara','Guipúzcoa','Huelva','Huesca','Jaén','León','Lleida','Lugo','Madrid','Málaga','Melilla','Murcia','Navarra','Ourense','Palencia','Las Palmas','Pontevedra','La Rioja','Salamanca','Santa Cruz de Tenerife','Segovia','Sevilla','Soria','Tarragona','Teruel','Toledo','Valencia','Valladolid','Vizcaya','Zamora','Zaragoza'];
+const IDI = ['Español','Inglés','Francés','Alemán','Italiano','Portugués','Catalán','Euskera','Gallego'];
+const POB = [['adultos','Adultos'],['pediatria','Pediatría'],['geriatria','Geriatría']];
+const MOD = [['presencial','Presencial'],['online','Online'],['domicilio','A domicilio']];
+const VIS = [['ciudad','Solo ciudad y provincia'],['exacta','Dirección exacta'],['zona','Solo zona aproximada (atiendo a domicilio)']];
+let uid = null, cat = {}, estado = 'pendiente';
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ok = async q => { const {data, error} = await q; if (error) throw error; return data; };
+const ck = (n, o) => o.map(([v, l]) => `<label class="ck"><input type="checkbox" name="${n}" value="${esc(v)}"> ${esc(l)}</label>`).join('');
+const getC = n => [...document.querySelectorAll(`input[name="${n}"]:checked`)].map(x => x.value);
+const setC = (n, a) => document.querySelectorAll(`input[name="${n}"]`).forEach(x => x.checked = (a || []).map(String).includes(x.value));
+function msg(t, err) { const m = $('#msg'); m.textContent = t; m.className = err ? 'err' : ''; m.style.display = 'block'; }
+
+/* ---------- Acceso ---------- */
+$('#lf').addEventListener('submit', async e => {
+  e.preventDefault();
+  const {error} = await db.auth.signInWithOtp({email: $('#em').value.trim(), options: {emailRedirectTo: location.origin + location.pathname}});
+  $('#lm').textContent = error && error.status === 429
+    ? 'Has pedido demasiados enlaces. Espera unos minutos e inténtalo de nuevo.'
+    : 'Si tu email está en la lista de invitados, recibirás un enlace en unos minutos. Revisa también la carpeta de spam.';
+});
+$('#out').addEventListener('click', async () => { await db.auth.signOut(); location.reload(); });
+db.auth.onAuthStateChange((ev, s) => { if (s && s.user && uid !== s.user.id) { uid = s.user.id; start(); } });
+db.auth.getSession().then(({data}) => { if (data.session && !uid) { uid = data.session.user.id; start(); } });
+
+async function start() {
+  $('#login').classList.add('hide'); $('#app').classList.remove('hide'); $('#out').classList.remove('hide');
+  try {
+    const [pa, he, es] = await Promise.all([db.from('patologias').select('*').order('nombre'), db.from('herramientas').select('*').order('nombre'), db.from('especialidades').select('*').order('id')]);
+    cat = {pa: pa.data, he: he.data, es: es.data};
+    $('#mod').innerHTML = ck('mod', MOD); $('#pob').innerHTML = ck('pob', POB); $('#idi').innerHTML = ck('idi', IDI.map(x => [x, x]));
+    $('#pat').innerHTML = ck('pat', cat.pa.map(x => [x.id, x.nombre]));
+    $('#dd').innerHTML = ck('dd', cat.es.map(x => [x.id, x.nombre])); $('#eq').innerHTML = ck('eq', cat.es.map(x => [x.id, x.nombre]));
+    $('#her').innerHTML = cat.he.map(x => `<div class="tool"><label><input type="checkbox" name="her" value="${x.id}"> ${esc(x.nombre)}</label><select data-h="${x.id}" aria-label="Frecuencia de uso"><option value="habitual">Habitual</option><option value="poco">Uso poco</option></select></div>`).join('');
+    await load();
+  } catch (err) { msg('No se han podido cargar tus datos: ' + err.message, true); }
+}
+
+async function load() {
+  const q = (t, c) => db.from(t).select('*').eq(c, uid);
+  const [p, pr, int, pp, ph, dd, eq, ce, co] = await Promise.all([db.from('profesionales').select('*').eq('id', uid).single(), q('profesionales_privados', 'profesional_id').single(), q('profesionales_internos', 'profesional_id').single(), q('profesional_patologia', 'profesional_id'), q('profesional_herramienta', 'profesional_id'), q('profesional_deriva_de', 'profesional_id'), q('profesional_equipo', 'profesional_id'), q('centros', 'profesional_id'), q('consentimientos', 'profesional_id')]);
+  [p, pr, int].forEach(r => { if (r.error) throw r.error; });
+  const P = p.data; estado = pr.data.estado;
+  $('#nombre').value = P.nombre; $('#apellidos').value = P.apellidos; $('#presentacion').value = P.presentacion || ''; $('#otras').value = P.otras_formaciones || '';
+  $('#colegiado').value = pr.data.num_colegiado; $('#colegio').value = pr.data.colegio;
+  if (P.foto_url) $('#foto').src = P.foto_url; else $('#foto').removeAttribute('src');
+  setC('mod', P.modalidades); setC('pob', P.poblaciones); setC('idi', P.idiomas);
+  $('#idiotros').value = (P.idiomas || []).filter(x => !IDI.includes(x)).join(', ');
+  setC('pat', pp.data.map(x => x.patologia_id)); setC('dd', dd.data.map(x => x.especialidad_id)); setC('eq', eq.data.map(x => x.especialidad_id));
+  setC('her', ph.data.map(x => x.herramienta_id)); ph.data.forEach(x => { const s = document.querySelector(`[data-h="${x.herramienta_id}"]`); if (s) s.value = x.nivel; });
+  $('#deriv').checked = int.data.acepta_derivaciones; $('#contacto').value = int.data.contacto_directo || '';
+  $('#centros').innerHTML = ''; (ce.data.length ? ce.data : [{es_principal: true}]).forEach(addCentro);
+  const act = t => co.data.some(x => x.tipo === t && !x.revocado);
+  $('#c_pub').checked = act('directorio_publico'); $('#c_int').checked = act('herramienta_interna'); $('#c_pol').checked = act('politica_privacidad');
+  const B = {pendiente: 'Tu perfil está <b>pendiente de verificación</b>. No será visible hasta que la administradora lo apruebe.', verificado: 'Tu perfil está <b>verificado</b>. Aparece en el directorio si has dado el consentimiento público.', rechazado: 'Tu perfil no ha sido aprobado. Contacta con la administradora.', baja: 'Tu perfil está de baja.'};
+  $('#banner').innerHTML = B[estado] || '';
+}
+
+/* ---------- Centros ---------- */
+function addCentro(c = {}) {
+  const d = document.createElement('div'); d.className = 'centro';
+  const f = (k, t, req) => `<label>${t}${req ? ' *' : ''}<input data-f="${k}" ${req ? 'required' : ''}></label>`;
+  d.innerHTML = `<div class="row">${f('nombre', 'Nombre del centro')}${f('direccion', 'Dirección')}</div>
+    <div class="row">${f('codigo_postal', 'Código postal')}${f('ciudad', 'Ciudad', 1)}<label>Provincia *<select data-f="provincia" required><option value="">Elige…</option>${PROV.map(p => `<option>${esc(p)}</option>`).join('')}</select></label></div>
+    <label>Ubicación que se muestra al público<select data-f="visibilidad_direccion">${VIS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select></label>
+    <div class="row">${f('telefono', 'Teléfono')}${f('email', 'Email del centro')}${f('web', 'Web')}</div>
+    <label class="ck"><input type="checkbox" data-f="mostrar_telefono"> Mostrar teléfono</label><label class="ck"><input type="checkbox" data-f="mostrar_email"> Mostrar email</label><label class="ck"><input type="checkbox" data-f="mostrar_web"> Mostrar web</label><br>
+    <label class="ck"><input type="radio" name="princ"> Centro principal</label> <button type="button" class="link rm">Quitar este centro</button>`;
+  d.querySelectorAll('[data-f]').forEach(el => { const k = el.dataset.f; if (el.type === 'checkbox') el.checked = !!c[k]; else el.value = c[k] ?? (k === 'visibilidad_direccion' ? 'ciudad' : ''); });
+  d.querySelector('[name=princ]').checked = !!c.es_principal;
+  d.querySelector('.rm').onclick = () => { if (document.querySelectorAll('.centro').length > 1) d.remove(); };
+  $('#centros').appendChild(d);
+}
+$('#addc').onclick = () => addCentro({});
+const wait = ms => new Promise(r => setTimeout(r, ms));
+async function geo(q) {
+  try { const j = await (await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=es&q=' + encodeURIComponent(q))).json(); return j[0] ? [+j[0].lat, +j[0].lon] : null; } catch { return null; }
+}
+async function readCentros() {
+  const out = [], bl = [...document.querySelectorAll('.centro')]; let warn = false;
+  for (const [i, d] of bl.entries()) {
+    const c = {profesional_id: uid};
+    d.querySelectorAll('[data-f]').forEach(el => { c[el.dataset.f] = el.type === 'checkbox' ? el.checked : (el.value.trim() || null); });
+    c.es_principal = d.querySelector('[name=princ]').checked;
+    const q = c.visibilidad_direccion === 'ciudad' ? `${c.ciudad}, ${c.provincia}, España` : `${c.direccion || ''} ${c.codigo_postal || ''} ${c.ciudad}, ${c.provincia}, España`;
+    if (i) await wait(1100);
+    const g = await geo(q) || (c.visibilidad_direccion !== 'ciudad' && await geo(`${c.ciudad}, ${c.provincia}, España`));
+    if (g) [c.latitud, c.longitud] = g; else warn = true;
+    out.push(c);
+  }
+  if (!out.some(c => c.es_principal)) out[0].es_principal = true;
+  return {out, warn};
+}
+
+/* ---------- Foto ---------- */
+$('#fotoin').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    msg('Subiendo foto…');
+    const bmp = await createImageBitmap(f), k = Math.min(1, 480 / Math.max(bmp.width, bmp.height));
+    const cv = document.createElement('canvas'); cv.width = bmp.width * k; cv.height = bmp.height * k; cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
+    const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', .85));
+    const path = `${uid}/foto.jpg`;
+    const up = await db.storage.from('fotos').upload(path, blob, {upsert: true, contentType: 'image/jpeg'}); if (up.error) throw up.error;
+    const u = db.storage.from('fotos').getPublicUrl(path).data.publicUrl + '?t=' + Date.now();
+    await ok(db.from('profesionales').update({foto_url: u}).eq('id', uid));
+    $('#foto').src = u; msg('Foto actualizada ✓');
+  } catch (err) { msg('No se ha podido subir la foto: ' + err.message, true); }
+});
+
+/* ---------- Guardar ---------- */
+async function replace(t, rows) { await ok(db.from(t).delete().eq('profesional_id', uid)); if (rows.length) await ok(db.from(t).insert(rows.map(r => ({profesional_id: uid, ...r})))); }
+async function consents() {
+  const want = {directorio_publico: $('#c_pub').checked, herramienta_interna: $('#c_int').checked, politica_privacidad: $('#c_pol').checked};
+  const cur = await ok(db.from('consentimientos').select('*').eq('profesional_id', uid));
+  for (const [t, v] of Object.entries(want)) {
+    const act = cur.some(x => x.tipo === t && !x.revocado);
+    if (v && !act) await ok(db.from('consentimientos').insert({profesional_id: uid, tipo: t, version_texto: VERSION}));
+    if (!v && act) await ok(db.from('consentimientos').update({revocado: true, revocado_en: new Date().toISOString()}).eq('profesional_id', uid).eq('tipo', t).eq('revocado', false));
+  }
+}
+$('#app').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!$('#c_pol').checked) return msg('Para guardar debes aceptar la política de privacidad.', true);
+  try {
+    msg('Guardando…');
+    const {out, warn} = await readCentros();
+    const idi = [...getC('idi'), ...$('#idiotros').value.split(',').map(x => x.trim()).filter(Boolean)];
+    await ok(db.from('profesionales').update({nombre: $('#nombre').value.trim(), apellidos: $('#apellidos').value.trim(), presentacion: $('#presentacion').value.trim() || null, otras_formaciones: $('#otras').value.trim() || null, modalidades: getC('mod'), poblaciones: getC('pob'), idiomas: idi}).eq('id', uid));
+    await ok(db.from('profesionales_privados').update({num_colegiado: $('#colegiado').value.trim(), colegio: $('#colegio').value.trim()}).eq('profesional_id', uid));
+    await ok(db.from('profesionales_internos').upsert({profesional_id: uid, acepta_derivaciones: $('#deriv').checked, contacto_directo: $('#contacto').value.trim() || null}));
+    await replace('profesional_patologia', getC('pat').map(id => ({patologia_id: +id})));
+    await replace('profesional_herramienta', getC('her').map(id => ({herramienta_id: +id, nivel: document.querySelector(`[data-h="${id}"]`).value})));
+    await replace('profesional_deriva_de', getC('dd').map(id => ({especialidad_id: +id})));
+    await replace('profesional_equipo', getC('eq').map(id => ({especialidad_id: +id})));
+    await replace('centros', out);
+    await consents();
+    msg(warn ? 'Guardado ✓. No hemos podido situar alguno de tus centros en el mapa; revisa la dirección.' : 'Guardado ✓');
+  } catch (err) { msg('Error al guardar: ' + err.message, true); }
+});
+$('#retirar').addEventListener('click', async () => {
+  if (!confirm('Se retirarán tus consentimientos y dejarás de aparecer en el directorio y en la zona interna. ¿Continuar?')) return;
+  try { $('#c_pub').checked = $('#c_int').checked = false; await consents(); msg('Ya no apareces en el directorio. Para borrar tus datos por completo, escríbenos y lo haremos.'); }
+  catch (err) { msg('Error: ' + err.message, true); }
+});
+</script>
+</body>
+</html>
